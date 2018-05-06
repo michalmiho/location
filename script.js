@@ -1,9 +1,16 @@
 function start() {
-  const coordinates = document.querySelector("#coordinates");
+  const coordinatesCanvas = document.querySelector("#coordinates");
+  const distanceCanvas = document.querySelector("#distance");
   const name = getParamFromLocation(location, "name");
   const server = getParamFromLocation(location, "server");
   const target = getParamFromLocation(location, "target");
-  positionLoop(coordinates, 10 * 1000, name, target, server);
+  positionLoop(
+    { coordinatesCanvas, distanceCanvas },
+    10 * 1000,
+    name,
+    target,
+    server
+  );
 }
 
 function getLocation() {
@@ -18,18 +25,42 @@ function getLocation() {
 }
 
 const positionLoop = (canvas, time, name, target, server) => {
-  console.log("pos loop");
+  const { coordinatesCanvas, distanceCanvas } = canvas;
   getLocation()
     .then(position => {
-      showPosition(canvas)(position);
+      showPosition(coordinatesCanvas)(position);
       return position;
     })
     .then(position => {
-      setPositionToServer(server, name, stringifyCoords(position.coords));
+      return Promise.all([
+        setPositionToServer(server, name, stringifyCoords(position.coords)),
+        getPositionFromServer(server, target)
+      ]);
+    })
+    .then(result => {
+      const postResult = result[0];
+      const getResult = result[1];
+      console.log({ postResult, getResult });
+      if (!postResult.success || !getResult.success) {
+        distanceCanvas.innerHTML = "Could not load / post location";
+        return;
+      }
+      const coords1 = parseCoords(postResult.location);
+      const coords2 = parseCoords(postResult.location);
+      const distance = getDistanceFromLatLonInKm(
+        coords1.latitude,
+        coords1.longitude,
+        coords2.latitude,
+        coords2.longitude
+      );
+
+      distanceCanvas.innerHTML =
+        "Distance: " + distance + "km" + "<br />" + distanceCanvas.innerHTML;
+    })
+    .then(() => {
+      setTimeout(() => positionLoop(canvas, time, name, target, server), time);
     })
     .catch(showError(canvas));
-
-  setTimeout(() => positionLoop(canvas, time, name, target, server), time);
 };
 
 function stringifyCoords(coords) {
@@ -43,6 +74,7 @@ function parseCoords(coordsString) {
 
 const showError = element => error => {
   element.innerHTML = "Could not load your position";
+  console.log(error);
 };
 
 const showPosition = element => position => {
