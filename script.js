@@ -29,7 +29,7 @@ const positionLoop = (canvas, time, name, target, server) => {
     })
     .catch(showError(canvas));
 
-  setTimeout(() => positionLoop(canvas, time), time);
+  setTimeout(() => positionLoop(canvas, time, name, target, server), time);
 };
 
 function stringifyCoords(coords) {
@@ -78,9 +78,14 @@ function getParamFromLocation(loc, name) {
 }
 
 function getPositionFromServer(server, name) {
-  return fetch("http://" + server + "/location?action=read&name=" + name).then(
-    r => r.json()
-  );
+  return fetch(
+    "http://" +
+      server +
+      "/location?action=read&name=" +
+      name +
+      "&r=" +
+      Math.random()
+  ).then(r => r.json());
 }
 
 function setPositionToServer(server, name, location) {
@@ -90,7 +95,9 @@ function setPositionToServer(server, name, location) {
       "/location?action=write&location=" +
       location +
       "&name=" +
-      name
+      name +
+      "&r=" +
+      Math.random()
   ).then(r => r.json());
 }
 
