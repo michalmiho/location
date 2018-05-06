@@ -81,7 +81,7 @@ function getPositionFromServer(server, name) {
   return fetch(
     "http://" +
       server +
-      "/location?action=read&name=" +
+      "/location/?action=read&name=" +
       name +
       "&r=" +
       Math.random()
@@ -92,7 +92,7 @@ function setPositionToServer(server, name, location) {
   return fetch(
     "http://" +
       server +
-      "/location?action=write&location=" +
+      "/location/?action=write&location=" +
       location +
       "&name=" +
       name +
