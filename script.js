@@ -6,7 +6,7 @@ function start() {
   const target = getParamFromLocation(location, "target");
   positionLoop(
     { coordinatesCanvas, distanceCanvas },
-    10 * 1000,
+    20 * 60 * 1000,
     name,
     target,
     server
@@ -55,7 +55,13 @@ const positionLoop = (canvas, time, name, target, server) => {
       );
 
       distanceCanvas.innerHTML =
-        "Distance: " + distance + "km" + "<br />" + distanceCanvas.innerHTML;
+        "[" +
+        new Date().toLocaleString() +
+        "]Distance: " +
+        distance +
+        "km" +
+        "<br />" +
+        distanceCanvas.innerHTML;
     })
     .then(() => {
       setTimeout(() => positionLoop(canvas, time, name, target, server), time);
